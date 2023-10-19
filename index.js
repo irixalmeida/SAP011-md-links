@@ -13,8 +13,8 @@
 
 //module.exports = { soma, readFile };
 
-function soma(a, b) {
-  return a + b;
-}
+//function soma(a, b) {
+//return a + b;
+//}
 
-module.exports = soma;
+//module.exports = { soma };
