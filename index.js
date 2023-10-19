@@ -1,20 +1,20 @@
-//const fs = require("fs");
+const fs = require("fs");
 
-//function soma(a, b) {
-//return a + b;
-//}
+function extractLinks(filePath) {
+  const content = fs.readFileSync(filePath, "utf-8");
+  const regex = /\[(.*?)\]\((http.*?)(?:\s+"(.*?)")?\)/g;
+  let match;
+  const links = [];
 
-//function readFile(filePath) {
-//fs.readFile(filePath, "utf8", (err, data) => {
-// if (err) throw err; // Check if error
-// console.log(data);
-// });
-//}
+  while ((match = regex.exec(content))) {
+    links.push({
+      href: match[2],
+      text: match[1].substring(0, 50),
+      file: filePath,
+    });
+  }
 
-//module.exports = { soma, readFile };
+  return links;
+}
 
-//function soma(a, b) {
-//return a + b;
-//}
-
-//module.exports = { soma };
+module.exports = { extractLinks };
