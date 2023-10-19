@@ -1,10 +1,13 @@
-const mdLinks = require('../');
+//const mdLinks = require('../');
 
+//describe('mdLinks', () => {
 
-describe('mdLinks', () => {
+//it('should...', () => {
+//console.log('FIX ME!');
+// });
 
-  it('should...', () => {
-    console.log('FIX ME!');
-  });
+//});
 
+test("teste fictício", () => {
+  expect(true).toBe(true);
 });

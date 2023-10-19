@@ -14,5 +14,19 @@
   },
   "dependencies": {
     "chalk": "^4.1.2"
-  }
+  },
+  "devDependencies": {
+    "@babel/cli": "^7.23.0",
+    "@babel/core": "^7.23.2",
+    "@babel/plugin-transform-modules-commonjs": "^7.23.0",
+    "jest": "^29.7.0"
+  },
+  "babel": {
+    "plugins": [
+      "@babel/plugin-transform-modules-commonjs"
+    ]
+  },
+  "scripts": {
+  "test": "jest"
+}
 }
