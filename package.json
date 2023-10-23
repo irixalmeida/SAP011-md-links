@@ -5,7 +5,7 @@
     "node": ">=16.x"
   },
   "scripts": {
-    "start": "node cli.js"
+    "test": "jest"
   },
   "bootcamp": {
     "createdAt": "2023-09-20T11:50:43.165Z",
@@ -13,7 +13,9 @@
     "commit": "a5360f78b634be4f14eaea996ee4c7afc85a2f48"
   },
   "dependencies": {
-    "chalk": "^4.1.2"
+    "axios": "^1.5.1",
+    "chalk": "^4.1.2",
+    "node-fetch": "^2.7.0"
   },
   "devDependencies": {
     "@babel/cli": "^7.23.0",
@@ -26,11 +28,7 @@
       "@babel/plugin-transform-modules-commonjs"
     ]
   },
-  "scripts": {
-  "test": "jest"
-},
-"bin": {
+  "bin": {
     "md-links": "./cli.js"
-}
-
+  }
 }

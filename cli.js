@@ -1,11 +1,19 @@
 #!/usr/bin/env node
-const { extractLinks } = require("./index");
+const {
+  readFile,
+  extractLinks,
+  validateLinks,
+  initializeFetch,
+} = require("./index");
 
-const args = process.argv.slice(2);
-const filePath = args[0];
-const options = args.slice(1);
+const filePath = process.argv[2];
 
-const links = extractLinks(filePath);
-links.forEach((link) => {
-  console.log(`${link.file} ${link.href} ${link.text}`);
-});
+initializeFetch
+  .then(() => readFile(filePath))
+  .then((data) => {
+    const links = extractLinks(data);
+    return validateLinks(links);
+  })
+  .catch((err) => {
+    console.error(`Erro: ${err.message}`);
+  });

@@ -4,3 +4,4 @@
 [Github](https://www.github.com)
 [Nodejs](https://nodejs.org/en)
 [Trello](https://trello.com)
+[Linkedin](https://www.linkedin.com/nãoexiste)
