@@ -1,4 +1,5 @@
 const fs = require("fs");
+const path = require("path");
 
 let fetch;
 
@@ -43,14 +44,39 @@ function validateLinks(links) {
   const validationPromises = links.map((link) => {
     return fetch(link.href)
       .then((response) => {
-        console.log(`${link.href} - ${response.status}`);
+        link.status = response.status;
+        link.statusText = response.ok ? "ok" : "fail";
+        return link;
       })
       .catch((error) => {
-        console.error(`Erro ao validar o link ${link.href}: ${error.message}`);
+        link.status = "ERROR";
+        link.statusText = error.message;
+        return link;
       });
   });
 
   return Promise.all(validationPromises);
+}
+
+function getFileExtension(filePath) {
+  return path.extname(filePath);
+}
+
+function getAllMdFiles(directoryPath) {
+  const entries = fs.readdirSync(directoryPath, { withFileTypes: true });
+  let mdFiles = [];
+
+  for (const entry of entries) {
+    if (entry.isDirectory()) {
+      mdFiles = mdFiles.concat(
+        getAllMdFiles(path.join(directoryPath, entry.name))
+      );
+    } else if (path.extname(entry.name) === ".md") {
+      mdFiles.push(path.join(directoryPath, entry.name));
+    }
+  }
+
+  return mdFiles;
 }
 
 module.exports = {
@@ -58,4 +84,6 @@ module.exports = {
   extractLinks,
   validateLinks,
   initializeFetch,
+  getFileExtension,
+  getAllMdFiles,
 };
