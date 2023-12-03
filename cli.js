@@ -1,4 +1,5 @@
 #!/usr/bin/env node
+const chalk = require("chalk");
 const {
   readFile,
   extractLinks,
@@ -13,9 +14,37 @@ const options = process.argv.slice(3);
 
 const hasOption = (option) => options.includes(option);
 
+function formatStatus(status) {
+  const statusText = status.toString();
+  if (status === 200) {
+    return chalk.bgGreen.black(` ${statusText} `);
+  } else if (status === 404) {
+    return chalk.bgRed.black(` ${statusText} `);
+  } else {
+    return chalk.bgGray.black(` ${statusText} `);
+  }
+}
+
+function displayLinkInfo(link) {
+  console.log(chalk.bold(link.text));
+  console.log(chalk.underline(link.href));
+  if (link.statusText) {
+    const statusMessage =
+      link.statusText.toUpperCase() === "OK"
+        ? chalk.green(link.statusText.toUpperCase())
+        : chalk.red(link.statusText.toUpperCase());
+    console.log(statusMessage + " " + formatStatus(link.status));
+  }
+}
+
 function processMdFile(mdFilePath) {
   return readFile(mdFilePath).then((data) => {
     const links = extractLinks(data);
+
+    if (links.length === 0) {
+      console.log(chalk.yellow(`Este arquivo não possui links: ${mdFilePath}`));
+      return;
+    }
 
     if (hasOption("--validate") && hasOption("--stats")) {
       return validateLinks(links).then((validatedLinks) => {
@@ -25,27 +54,21 @@ function processMdFile(mdFilePath) {
         const brokenLinks = validatedLinks.filter(
           (link) => link.status >= 400
         ).length;
-        console.log(`Total: ${totalLinks}`);
-        console.log(`Unique: ${uniqueLinks}`);
-        console.log(`Broken: ${brokenLinks}`);
+        console.log(chalk.green(`Total: ${totalLinks}`));
+        console.log(chalk.blue(`Unique: ${uniqueLinks}`));
+        console.log(chalk.red(`Broken: ${brokenLinks}`));
       });
     } else if (hasOption("--validate")) {
       return validateLinks(links).then((validatedLinks) => {
-        validatedLinks.forEach((link) => {
-          console.log(
-            `${mdFilePath} ${link.href} ${link.statusText} ${link.status} ${link.text}`
-          );
-        });
+        validatedLinks.forEach(displayLinkInfo);
       });
     } else if (hasOption("--stats")) {
       const totalLinks = links.length;
       const uniqueLinks = new Set(links.map((link) => link.href)).size;
-      console.log(`Total: ${totalLinks}`);
-      console.log(`Unique: ${uniqueLinks}`);
+      console.log(chalk.green(`Total: ${totalLinks}`));
+      console.log(chalk.blue(`Unique: ${uniqueLinks}`));
     } else {
-      links.forEach((link) => {
-        console.log(`${mdFilePath} ${link.href} ${link.text}`);
-      });
+      links.forEach(displayLinkInfo);
     }
   });
 }
@@ -61,5 +84,5 @@ initializeFetch
     }
   })
   .catch((err) => {
-    console.error(`Erro: ${err.message}`);
+    console.error(chalk.red(`Erro: ${err.message}`));
   });

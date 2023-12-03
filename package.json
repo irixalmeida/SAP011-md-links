@@ -21,7 +21,8 @@
     "@babel/cli": "^7.23.0",
     "@babel/core": "^7.23.2",
     "@babel/plugin-transform-modules-commonjs": "^7.23.0",
-    "jest": "^29.7.0"
+    "jest": "^29.7.0",
+    "jet": "^0.8.3"
   },
   "babel": {
     "plugins": [
