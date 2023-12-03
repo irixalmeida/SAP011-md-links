@@ -5,7 +5,7 @@
     "node": ">=16.x"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest --coverage --verbose"
   },
   "bootcamp": {
     "createdAt": "2023-09-20T11:50:43.165Z",
@@ -19,8 +19,10 @@
   },
   "devDependencies": {
     "@babel/cli": "^7.23.0",
-    "@babel/core": "^7.23.2",
+    "@babel/core": "^7.23.5",
     "@babel/plugin-transform-modules-commonjs": "^7.23.0",
+    "@babel/preset-env": "^7.23.5",
+    "babel-jest": "^29.7.0",
     "jest": "^29.7.0",
     "jet": "^0.8.3"
   },

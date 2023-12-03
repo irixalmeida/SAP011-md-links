@@ -2,7 +2,7 @@
 const chalk = require("chalk");
 const {
   readFile,
-  extractLinks,
+  mdLinks,
   validateLinks,
   initializeFetch,
   getFileExtension,
@@ -39,7 +39,7 @@ function displayLinkInfo(link) {
 
 function processMdFile(mdFilePath) {
   return readFile(mdFilePath).then((data) => {
-    const links = extractLinks(data);
+    const links = mdLinks(data);
 
     if (links.length === 0) {
       console.log(chalk.yellow(`Este arquivo não possui links: ${mdFilePath}`));

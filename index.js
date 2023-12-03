@@ -3,14 +3,24 @@ const path = require("path");
 
 let fetch;
 
-const initializeFetch = new Promise((resolve, reject) => {
-  import("node-fetch")
-    .then((module) => {
-      fetch = module.default;
-      resolve();
-    })
-    .catch(reject);
-});
+// Verifica se estamos em um ambiente de teste
+const isTestEnvironment = process.env.NODE_ENV === "test";
+
+if (!isTestEnvironment) {
+  const initializeFetch = new Promise((resolve, reject) => {
+    import("node-fetch")
+      .then((module) => {
+        fetch = module.default;
+        resolve();
+      })
+      .catch(reject);
+  });
+
+  module.exports.initializeFetch = initializeFetch;
+} else {
+  // Para ambiente de teste, use require
+  fetch = require("node-fetch");
+}
 
 function readFile(filePath) {
   return new Promise((resolve, reject) => {
@@ -21,7 +31,7 @@ function readFile(filePath) {
   });
 }
 
-function extractLinks(data) {
+function mdLinks(data) {
   const regex = /\[(.*?)\]\((http.*?)(?:\s+"(.*?)")?\)/g;
   let match;
   const links = [];
@@ -37,10 +47,6 @@ function extractLinks(data) {
 }
 
 function validateLinks(links) {
-  if (!fetch) {
-    return Promise.reject(new Error("fetch não foi inicializado"));
-  }
-
   const validationPromises = links.map((link) => {
     return fetch(link.href)
       .then((response) => {
@@ -81,9 +87,8 @@ function getAllMdFiles(directoryPath) {
 
 module.exports = {
   readFile,
-  extractLinks,
+  mdLinks,
   validateLinks,
-  initializeFetch,
   getFileExtension,
   getAllMdFiles,
 };
