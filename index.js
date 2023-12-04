@@ -21,7 +21,7 @@ function readFile(filePath) {
   });
 }
 
-function extractLinks(data) {
+function mdLinks(data) {
   const regex = /\[(.*?)\]\((http.*?)(?:\s+"(.*?)")?\)/g;
   let match;
   const links = [];
@@ -77,7 +77,7 @@ function getAllMdFiles(directoryPath) {
 
 module.exports = {
   readFile,
-  extractLinks,
+  mdLinks,
   validateLinks,
   initializeFetch,
   getFileExtension,
