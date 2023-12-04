@@ -1,8 +1,8 @@
 const fetch = require("node-fetch"); // Import the fetch library
-const { validateLinks } = require("../index"); // Import the validateLinks function
+const { validateLinks } = require("../index");
 const fs = require("fs");
 const { readFile } = require("../index");
-const { extractLinks } = require("../index");
+const { mdLinks } = require("../index");
 const { getFileExtension } = require("../index");
 
 jest.mock("fs");
@@ -27,7 +27,6 @@ describe("readFile", () => {
   });
 });
 
-// Mock the fetch function
 jest.mock("node-fetch", () => jest.fn());
 
 describe("validateLinks", () => {
@@ -36,49 +35,49 @@ describe("validateLinks", () => {
   });
 
   it("deve retornar uma promessa que resolve para um array de links com as propriedades status e statusText", async () => {
-    // Mock the fetch response
+    //Mock a resposta do fetch
     const mockResponse = {
       status: 200,
       ok: true,
     };
     fetch.mockResolvedValue(mockResponse);
 
-    // Define the input links
+    //Define os links de entrada
     const links = [
       { href: "https://example.com" },
       { href: "https://google.com" },
     ];
 
-    // Call the validateLinks function
+    // Chama a função validateLinks
     const result = await validateLinks(links);
 
-    // Verify the result
+    // Verifica se o resultado é um array
     expect(result).toEqual([
       { href: "https://example.com", status: 200, statusText: "ok" },
       { href: "https://google.com", status: 200, statusText: "ok" },
     ]);
 
-    // Verify that fetch was called with the correct URLs
+    //Verifica se o fetch foi chamado com os URLs corretos
     expect(fetch).toHaveBeenCalledTimes(2);
     expect(fetch).toHaveBeenCalledWith("https://example.com");
     expect(fetch).toHaveBeenCalledWith("https://google.com");
   });
 
   it("deve lidar com erros do fetch e retornar links com status ERROR e mensagem de erro", async () => {
-    // Mock the fetch error
+    //Mock o erro do fetch
     const mockError = new Error("Network error");
     fetch.mockRejectedValue(mockError);
 
-    // Define the input links
+    // Define os links de entrada
     const links = [
       { href: "https://example.com" },
       { href: "https://google.com" },
     ];
 
-    // Call the validateLinks function
+    //Chama a função validateLinks
     const result = await validateLinks(links);
 
-    // Verify the result
+    // Verifica o resultado
     expect(result).toEqual([
       {
         href: "https://example.com",
@@ -92,14 +91,14 @@ describe("validateLinks", () => {
       },
     ]);
 
-    // Verify that fetch was called with the correct URLs
+    // Verifica se o fetch foi chamado com os URLs corretos
     expect(fetch).toHaveBeenCalledTimes(2);
     expect(fetch).toHaveBeenCalledWith("https://example.com");
     expect(fetch).toHaveBeenCalledWith("https://google.com");
   });
 });
 
-describe("extractLinks", () => {
+describe("mdLinks", () => {
   it("deve retornar um array de objetos de link para uma string com links em Markdown", () => {
     const markdown =
       "[Google](https://google.com) e [OpenAI](https://openai.com)";
@@ -108,12 +107,12 @@ describe("extractLinks", () => {
       { text: "OpenAI", href: "https://openai.com" },
     ];
 
-    expect(extractLinks(markdown)).toEqual(expectedLinks);
+    expect(mdLinks(markdown)).toEqual(expectedLinks);
   });
 
   it("deve retornar um array vazio para uma string sem links", () => {
     const text = "Este é um texto sem links.";
-    expect(extractLinks(text)).toEqual([]);
+    expect(mdLinks(text)).toEqual([]);
   });
 });
 
