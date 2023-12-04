@@ -37,10 +37,6 @@ function extractLinks(data) {
 }
 
 function validateLinks(links) {
-  if (!fetch) {
-    return Promise.reject(new Error("fetch não foi inicializado"));
-  }
-
   const validationPromises = links.map((link) => {
     return fetch(link.href)
       .then((response) => {

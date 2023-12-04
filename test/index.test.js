@@ -1,89 +1,129 @@
+const fetch = require("node-fetch"); // Import the fetch library
+const { validateLinks } = require("../index"); // Import the validateLinks function
 const fs = require("fs");
-const path = require("path");
+const { readFile } = require("../index");
+const { extractLinks } = require("../index");
+const { getFileExtension } = require("../index");
 
-let fetch;
+jest.mock("fs");
 
-const initializeFetch = new Promise((resolve, reject) => {
-  import("node-fetch")
-    .then((module) => {
-      fetch = module.default;
-      resolve();
-    })
-    .catch(reject);
+describe("readFile", () => {
+  it("deve resolver com uma string vazia para um arquivo vazio", async () => {
+    fs.readFile.mockImplementation((path, encoding, callback) => {
+      callback(null, "");
+    });
+
+    await expect(readFile("caminho/para/arquivo/vazio.txt")).resolves.toBe("");
+  });
+
+  it("deve rejeitar para um caminho de arquivo inválido", async () => {
+    fs.readFile.mockImplementation((path, encoding, callback) => {
+      callback(new Error("Caminho inválido"), null);
+    });
+
+    await expect(readFile("caminho/inválido.txt")).rejects.toThrow(
+      "Caminho inválido"
+    );
+  });
 });
 
-function readFile(filePath) {
-  return new Promise((resolve, reject) => {
-    fs.readFile(filePath, "utf8", (err, data) => {
-      if (err) reject(err);
-      else resolve(data);
-    });
-  });
-}
+// Mock the fetch function
+jest.mock("node-fetch", () => jest.fn());
 
-function extractLinks(data) {
-  const regex = /\[(.*?)\]\((http.*?)(?:\s+"(.*?)")?\)/g;
-  let match;
-  const links = [];
-
-  while ((match = regex.exec(data)) !== null) {
-    links.push({
-      text: match[1].slice(0, 50),
-      href: match[2],
-    });
-  }
-
-  return links;
-}
-
-function validateLinks(links) {
-  if (!fetch) {
-    return Promise.reject(new Error("fetch não foi inicializado"));
-  }
-
-  const validationPromises = links.map((link) => {
-    return fetch(link.href)
-      .then((response) => {
-        link.status = response.status;
-        link.statusText = response.ok ? "ok" : "fail";
-        return link;
-      })
-      .catch((error) => {
-        link.status = "ERROR";
-        link.statusText = error.message;
-        return link;
-      });
+describe("validateLinks", () => {
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
-  return Promise.all(validationPromises);
-}
+  it("deve retornar uma promessa que resolve para um array de links com as propriedades status e statusText", async () => {
+    // Mock the fetch response
+    const mockResponse = {
+      status: 200,
+      ok: true,
+    };
+    fetch.mockResolvedValue(mockResponse);
 
-function getFileExtension(filePath) {
-  return path.extname(filePath);
-}
+    // Define the input links
+    const links = [
+      { href: "https://example.com" },
+      { href: "https://google.com" },
+    ];
 
-function getAllMdFiles(directoryPath) {
-  const entries = fs.readdirSync(directoryPath, { withFileTypes: true });
-  let mdFiles = [];
+    // Call the validateLinks function
+    const result = await validateLinks(links);
 
-  for (const entry of entries) {
-    if (entry.isDirectory()) {
-      mdFiles = mdFiles.concat(
-        getAllMdFiles(path.join(directoryPath, entry.name))
-      );
-    } else if (path.extname(entry.name) === ".md") {
-      mdFiles.push(path.join(directoryPath, entry.name));
-    }
-  }
+    // Verify the result
+    expect(result).toEqual([
+      { href: "https://example.com", status: 200, statusText: "ok" },
+      { href: "https://google.com", status: 200, statusText: "ok" },
+    ]);
 
-  return mdFiles;
-}
+    // Verify that fetch was called with the correct URLs
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(fetch).toHaveBeenCalledWith("https://example.com");
+    expect(fetch).toHaveBeenCalledWith("https://google.com");
+  });
 
-module.exports = {
-  readFile,
-  extractLinks,
-  validateLinks,
-  initializeFetch,
-  getFileExtension,
-  getAllMdFiles,
-};
+  it("deve lidar com erros do fetch e retornar links com status ERROR e mensagem de erro", async () => {
+    // Mock the fetch error
+    const mockError = new Error("Network error");
+    fetch.mockRejectedValue(mockError);
+
+    // Define the input links
+    const links = [
+      { href: "https://example.com" },
+      { href: "https://google.com" },
+    ];
+
+    // Call the validateLinks function
+    const result = await validateLinks(links);
+
+    // Verify the result
+    expect(result).toEqual([
+      {
+        href: "https://example.com",
+        status: "ERROR",
+        statusText: "Network error",
+      },
+      {
+        href: "https://google.com",
+        status: "ERROR",
+        statusText: "Network error",
+      },
+    ]);
+
+    // Verify that fetch was called with the correct URLs
+    expect(fetch).toHaveBeenCalledTimes(2);
+    expect(fetch).toHaveBeenCalledWith("https://example.com");
+    expect(fetch).toHaveBeenCalledWith("https://google.com");
+  });
+});
+
+describe("extractLinks", () => {
+  it("deve retornar um array de objetos de link para uma string com links em Markdown", () => {
+    const markdown =
+      "[Google](https://google.com) e [OpenAI](https://openai.com)";
+    const expectedLinks = [
+      { text: "Google", href: "https://google.com" },
+      { text: "OpenAI", href: "https://openai.com" },
+    ];
+
+    expect(extractLinks(markdown)).toEqual(expectedLinks);
+  });
+
+  it("deve retornar um array vazio para uma string sem links", () => {
+    const text = "Este é um texto sem links.";
+    expect(extractLinks(text)).toEqual([]);
+  });
+});
+
+describe("getFileExtension", () => {
+  it("deve retornar a extensão correta do arquivo", () => {
+    expect(getFileExtension("documento.md")).toBe(".md");
+    expect(getFileExtension("imagem.png")).toBe(".png");
+  });
+
+  it("deve retornar uma string vazia para um caminho sem extensão", () => {
+    expect(getFileExtension("arquivo")).toBe("");
+  });
+});
