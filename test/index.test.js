@@ -2,7 +2,7 @@ const fetch = require("node-fetch"); // Import the fetch library
 const { validateLinks } = require("../index"); // Import the validateLinks function
 const fs = require("fs");
 const { readFile } = require("../index");
-const { mdLinks } = require("../index");
+const { extractLinks } = require("../index");
 const { getFileExtension } = require("../index");
 
 jest.mock("fs");
@@ -99,7 +99,7 @@ describe("validateLinks", () => {
   });
 });
 
-describe("mdLinks", () => {
+describe("extractLinks", () => {
   it("deve retornar um array de objetos de link para uma string com links em Markdown", () => {
     const markdown =
       "[Google](https://google.com) e [OpenAI](https://openai.com)";
@@ -108,12 +108,12 @@ describe("mdLinks", () => {
       { text: "OpenAI", href: "https://openai.com" },
     ];
 
-    expect(mdLinks(markdown)).toEqual(expectedLinks);
+    expect(extractLinks(markdown)).toEqual(expectedLinks);
   });
 
   it("deve retornar um array vazio para uma string sem links", () => {
     const text = "Este é um texto sem links.";
-    expect(mdLinks(text)).toEqual([]);
+    expect(extractLinks(text)).toEqual([]);
   });
 });
 
